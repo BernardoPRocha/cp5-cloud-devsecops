@@ -1,0 +1,50 @@
+name: Security Pipeline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bloquear achados de codigo vulneravel
+        run: semgrep scan --config p/default --config .semgrep.yml --error --metrics=off site
+
+  trivy:
+    name: Trivy
+    needs: [gitleaks, semgrep]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir imagem
+        run: docker build --pull -t cp5-site:${{ github.sha }} .
+      - name: Bloquear CVEs criticos na imagem
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          image-ref: cp5-site:${{ github.sha }}
+          format: table
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'

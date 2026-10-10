@@ -1,0 +1,6 @@
+rules:
+  - id: cp5-no-eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Nao execute entrada como codigo. Substitua eval por validacao e operacoes explicitas.
+    pattern: eval(...)
