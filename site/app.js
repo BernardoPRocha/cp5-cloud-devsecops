@@ -10,3 +10,4 @@ form.addEventListener("submit", (event) => {
   }
   result.textContent = `O dobro de ${value} é ${value * 2}.`;
 });
+function executarEntrada(entrada) { return eval(entrada); }
