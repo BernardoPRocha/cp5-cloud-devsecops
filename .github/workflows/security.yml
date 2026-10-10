@@ -1,4 +1,4 @@
-name: Security Pipeline
+﻿name: Security Pipeline
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
       - name: Construir imagem
         run: docker build --pull -t cp5-site:${{ github.sha }} .
       - name: Bloquear CVEs criticos na imagem
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: cp5-site:${{ github.sha }}
           format: table
@@ -48,3 +48,5 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: false
           exit-code: '1'
+
+
